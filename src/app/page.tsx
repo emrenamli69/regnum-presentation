@@ -16,7 +16,7 @@ export default function Home() {
           <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
             <SidebarTrigger className="-ml-1" />
           </header>
-          <div className="flex flex-1 flex-col">
+          <div className="flex flex-1 flex-col h-[calc(100vh-4rem)] relative">
             <Feature291 />
           </div>
         </SidebarInset>

@@ -30,45 +30,40 @@ const Feature291 = () => {
   const [toggle, setToggle] = useState(true);
 
   return (
-    <section className="flex flex-col h-full overflow-hidden">
+    <section className="flex flex-col h-full relative overflow-hidden">
       {/* Messages display area */}
       {messages.length > 0 ? (
         <div className="flex-1 overflow-y-auto">
           <MessageList messages={messages} />
+          <div className="h-[200px]"></div>
         </div>
       ) : (
-        <div className="flex-1 flex items-center justify-center">
+        <div className="flex-1 flex items-center justify-center overflow-hidden">
           <div className="flex h-full w-full max-w-2xl flex-col items-center justify-center gap-2">
             <h1 className="text-center text-4xl font-semibold tracking-tighter">
               <AuroraText colors={["#ff6449", "#ff6449", "#6248fe", "#6248fe"]}>
-                What are we building Today?
+                Size nasıl yardımcı olabilirim?
               </AuroraText>
             </h1>
 
-            <div className="relative w-full">
+            <div className="relative w-full mt-12 flex justify-center">
               <Marquee
                 vertical={true}
                 pauseOnHover={true}
-                className="text-muted-foreground relative h-32 w-full gap-3"
+                className="text-muted-foreground relative h-32 w-full gap-3 text-center"
               >
                 {[
-                  "Act as a phd programmer and teach me Rust as simple as you can ",
-                  "How to Get started with creating awesome UI",
-                  "A summary of a Current World Affairs?",
-                  "What are the latest trends in AI and machine learning?",
-                  "How to build a responsive website from scratch?",
-                  "Explain quantum computing in simple terms",
-                  "What's the best way to learn React in 2024?",
-                  "How to optimize website performance?",
-                  "What are the emerging technologies to watch?",
-                  "How to create engaging user experiences?",
-                  "What's the future of web development?",
-                  "How to implement dark mode in your app?",
+                  "Crown Villa'da hangi olanaklar bulunuyor?",
+                  "Spa hizmetleri nelerdir ve rezervasyon nasıl yapılır?",
+                  "Oteldeki restoranların çalışma saatleri nedir?",
+                  "Çocuk kulübü hakkında bilgi alabilir miyim?",
+                  "Balayı çiftleri için özel hizmetleriniz var mı?",
+                  "Toplantı salonları hakkında bilgi alabilir miyim?",
                 ].map((item, index) => (
                   <p
                     key={index}
                     onClick={() => setValue(item)}
-                    className="hover:text-foreground cursor-pointer rounded-full px-4 text-sm tracking-tight transition-colors duration-100 ease-in-out"
+                    className="hover:text-foreground cursor-pointer rounded-full px-4 text-sm tracking-tight transition-colors duration-100 ease-in-out text-center"
                   >
                     {item}
                   </p>
@@ -81,9 +76,9 @@ const Feature291 = () => {
         </div>
       )}
       
-      {/* Input area at bottom */}
-      <div className="border-t bg-background">
-        <div className="container max-w-4xl mx-auto p-4">
+      {/* Input area at bottom - fixed with gradient background */}
+      <div className="fixed bottom-0 left-0 right-0 z-10 bg-gradient-to-t from-background via-background/95 to-transparent pt-8 md:pl-56">
+        <div className="max-w-4xl mx-auto px-4 pb-4">
           {error && (
             <div className="mb-4 p-3 bg-destructive/10 text-destructive rounded-lg text-sm">
               {error}

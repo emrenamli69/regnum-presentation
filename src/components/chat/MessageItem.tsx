@@ -2,10 +2,11 @@
 
 import React from 'react';
 import { Message } from '@/types/chat';
-import { User, Bot } from 'lucide-react';
+import { User, Bot, ExternalLink } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { Button } from '@/components/ui/button';
 
 interface MessageItemProps {
   message: Message;
@@ -38,6 +39,10 @@ export function MessageItem({ message }: MessageItemProps) {
                 <ReactMarkdown 
                   remarkPlugins={[remarkGfm]}
                   components={{
+                    // Add padding to paragraphs
+                    p({children}) {
+                      return <p className="my-3">{children}</p>;
+                    },
                     // Customize code blocks
                     code({node, className, children, ...props}) {
                       const match = /language-(\w+)/.exec(className || '');
@@ -61,17 +66,18 @@ export function MessageItem({ message }: MessageItemProps) {
                         </div>
                       );
                     },
-                    // Customize links
+                    // Customize links to render as buttons
                     a({href, children}) {
                       return (
-                        <a 
-                          href={href} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="text-primary hover:underline"
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="inline-flex items-center gap-1 my-1"
+                          onClick={() => window.open(href, '_blank', 'noopener,noreferrer')}
                         >
-                          {children}
-                        </a>
+                          Link
+                          <ExternalLink className="h-3 w-3" />
+                        </Button>
                       );
                     },
                     // Customize lists for better spacing
@@ -91,6 +97,10 @@ export function MessageItem({ message }: MessageItemProps) {
               <ReactMarkdown 
                 remarkPlugins={[remarkGfm]}
                 components={{
+                  // Add padding to paragraphs
+                  p({children}) {
+                    return <p className="my-3">{children}</p>;
+                  },
                   // Customize code blocks
                   code({node, className, children, ...props}) {
                     const match = /language-(\w+)/.exec(className || '');
@@ -114,17 +124,18 @@ export function MessageItem({ message }: MessageItemProps) {
                       </div>
                     );
                   },
-                  // Customize links
+                  // Customize links to render as buttons
                   a({href, children}) {
                     return (
-                      <a 
-                        href={href} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="text-primary hover:underline"
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="inline-flex items-center gap-1 my-1"
+                        onClick={() => window.open(href, '_blank', 'noopener,noreferrer')}
                       >
-                        {children}
-                      </a>
+                        Link
+                        <ExternalLink className="h-3 w-3" />
+                      </Button>
                     );
                   },
                   // Customize lists for better spacing
