@@ -7,6 +7,7 @@ import React from "react";
 
 import { cn } from "@/lib/utils";
 import { useChat } from "@/hooks/useChat";
+import { useAgent } from "@/contexts/AgentContext";
 import { MessageList } from "@/components/chat/MessageList";
 
 import { AuroraText } from "@/components/magicui/aurora-text";
@@ -15,6 +16,7 @@ import { Marquee } from "@/components/magicui/marquee";
 const Feature291 = () => {
   const [value, setValue] = useState("");
   const { messages, sendMessage, isLoading, error } = useChat();
+  const { currentAgent } = useAgent();
   
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     // Input change handled by setValue in PlaceholdersAndVanishInput
@@ -42,7 +44,7 @@ const Feature291 = () => {
           <div className="flex h-full w-full max-w-2xl flex-col items-center justify-center gap-2">
             <h1 className="text-center text-4xl font-semibold tracking-tighter">
               <AuroraText colors={["#ff6449", "#ff6449", "#6248fe", "#6248fe"]}>
-                Size nasıl yardımcı olabilirim?
+                {currentAgent.welcomeMessage || "Size nasıl yardımcı olabilirim?"}
               </AuroraText>
             </h1>
 
@@ -87,7 +89,7 @@ const Feature291 = () => {
           
           <div className="bg-muted rounded-4xl w-full space-y-2 px-6 py-4">
             <PlaceholdersAndVanishInput
-              placeholder="How can i Help you Today"
+              placeholder={currentAgent.placeholder || "How can i Help you Today"}
               className="mb-4 h-12 w-full max-w-full bg-transparent shadow-none"
               onChange={handleChange}
               onSubmit={onSubmit}

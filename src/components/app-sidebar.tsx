@@ -4,6 +4,7 @@ import * as React from "react"
 import { Minus, Plus, MessageSquare, PlusCircle } from "lucide-react"
 import Image from "next/image"
 import { useChat } from "@/hooks/useChat"
+import { useAgent } from "@/contexts/AgentContext"
 
 import { SearchForm } from "@/components/search-form"
 import {
@@ -24,9 +25,17 @@ import {
   SidebarMenuSubItem,
   SidebarRail,
 } from "@/components/ui/sidebar"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { conversations, currentConversation, selectConversation, createNewConversation } = useChat();
+  const { currentAgent, selectAgent, availableAgents } = useAgent();
   
   // Group conversations by time period
   const groupConversations = () => {
@@ -134,6 +143,33 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 height={80}
                 className="w-auto h-32"
               />
+            </div>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <div className="px-3 py-2">
+              <Select value={currentAgent.id} onValueChange={selectAgent}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select an agent">
+                    <div className="flex items-center gap-2">
+                      <currentAgent.icon className="size-4" />
+                      <span>{currentAgent.name}</span>
+                    </div>
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  {availableAgents.map((agent) => (
+                    <SelectItem key={agent.id} value={agent.id}>
+                      <div className="flex items-center gap-2">
+                        <agent.icon className="size-4" />
+                        <div className="flex flex-col">
+                          <span className="font-medium">{agent.name}</span>
+                          <span className="text-xs text-muted-foreground">{agent.description}</span>
+                        </div>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </SidebarMenuItem>
           <SidebarMenuItem>

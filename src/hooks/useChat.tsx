@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { Message, Conversation, StreamEvent } from '@/types/chat';
 import { difyService } from '@/services/dify';
+import { useAgent } from '@/contexts/AgentContext';
 
 interface ChatContextType {
   conversations: Conversation[];
@@ -19,6 +20,7 @@ interface ChatContextType {
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
 
 export function ChatProvider({ children }: { children: React.ReactNode }) {
+  const { currentAgent } = useAgent();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [currentConversation, setCurrentConversation] = useState<Conversation | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -26,9 +28,10 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
   const [error, setError] = useState<string | null>(null);
   const [currentTaskId, setCurrentTaskId] = useState<string | null>(null);
 
-  // Load conversations from localStorage on mount
+  // Load conversations from localStorage on mount and when agent changes
   useEffect(() => {
-    const stored = localStorage.getItem('chat_conversations');
+    const storageKey = `chat_conversations_${currentAgent.id}`;
+    const stored = localStorage.getItem(storageKey);
     if (stored) {
       try {
         const parsed = JSON.parse(stored);
@@ -38,19 +41,33 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
           const recent = parsed[0];
           setCurrentConversation(recent);
           setMessages(recent.messages);
+        } else {
+          setCurrentConversation(null);
+          setMessages([]);
         }
       } catch (error) {
         console.error('Failed to load conversations:', error);
+        setCurrentConversation(null);
+        setMessages([]);
       }
+    } else {
+      // Clear conversations when switching to an agent with no history
+      setConversations([]);
+      setCurrentConversation(null);
+      setMessages([]);
     }
-  }, []);
+  }, [currentAgent]);
 
   // Save conversations to localStorage whenever they change
   useEffect(() => {
+    const storageKey = `chat_conversations_${currentAgent.id}`;
     if (conversations.length > 0) {
-      localStorage.setItem('chat_conversations', JSON.stringify(conversations));
+      localStorage.setItem(storageKey, JSON.stringify(conversations));
+    } else {
+      // Don't remove the key, just save empty array
+      localStorage.setItem(storageKey, JSON.stringify([]));
     }
-  }, [conversations]);
+  }, [conversations, currentAgent]);
 
   const createNewConversation = useCallback(() => {
     const newConversation: Conversation = {
@@ -222,7 +239,8 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
         (error: Error) => {
           setError(error.message);
           setMessages(prev => prev.filter(m => m.id !== assistantMessage.id));
-        }
+        },
+        currentAgent
       );
     } catch (error) {
       setError((error as Error).message);

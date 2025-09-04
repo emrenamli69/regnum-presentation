@@ -1,12 +1,24 @@
 import { ChatRequest, StreamEvent, ChatCompletionResponse } from '@/types/chat';
 import { handleStreamResponse } from '@/utils/sse-parser';
+import { AgentConfig } from '@/config/agents';
 
 export class DifyService {
   private userId: string;
+  private agentConfig: AgentConfig | null = null;
 
-  constructor() {
+  constructor(agentConfig?: AgentConfig) {
     // Generate or retrieve a unique user ID
     this.userId = this.getUserId();
+    if (agentConfig) {
+      this.agentConfig = agentConfig;
+    }
+  }
+
+  /**
+   * Set the agent configuration
+   */
+  setAgentConfig(agentConfig: AgentConfig) {
+    this.agentConfig = agentConfig;
   }
 
   /**
@@ -30,8 +42,11 @@ export class DifyService {
     query: string,
     conversationId?: string,
     onEvent?: (event: StreamEvent) => void,
-    onError?: (error: Error) => void
+    onError?: (error: Error) => void,
+    agentConfig?: AgentConfig
   ): Promise<void> {
+    const config = agentConfig || this.agentConfig;
+    
     const request: ChatRequest = {
       query,
       inputs: {},
@@ -46,6 +61,10 @@ export class DifyService {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'X-Agent-Config': JSON.stringify({
+            apiUrl: config?.apiUrl,
+            apiKey: config?.apiKey
+          })
         },
         body: JSON.stringify(request),
       });
