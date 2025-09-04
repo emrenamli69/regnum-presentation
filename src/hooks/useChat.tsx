@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { Message, Conversation, StreamEvent } from '@/types/chat';
 import { difyService } from '@/services/dify';
+import { CRMService } from '@/services/crm-service';
 import { useAgent } from '@/contexts/AgentContext';
 
 interface ChatContextType {
@@ -140,10 +141,65 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     let isFirstChunk = true;
 
     try {
-      await difyService.sendMessage(
-        content,
-        conversation.id.startsWith('conv_') ? undefined : conversation.id,
-        (event: StreamEvent) => {
+      // Handle different API types
+      if (currentAgent.apiType === 'webhook') {
+        // For CRM webhook API
+        const crmService = new CRMService(currentAgent);
+        await crmService.sendMessage(
+          content,
+          (response: string) => {
+            // Update the assistant message with the response
+            setMessages(prev => {
+              const newMessages = [...prev];
+              const lastMessage = newMessages[newMessages.length - 1];
+              if (lastMessage && lastMessage.role === 'assistant') {
+                lastMessage.content = response;
+                lastMessage.isStreaming = false;
+              }
+              return newMessages;
+            });
+
+            // Update conversation
+            const updatedConversation = {
+              ...conversation,
+              updated_at: Date.now(),
+              messages: [...updatedMessages, {
+                ...assistantMessage,
+                content: response,
+                isStreaming: false,
+              }],
+            };
+
+            // Update title if it's still "New Chat"
+            if (updatedConversation.title === 'New Chat' && content) {
+              updatedConversation.title = content.slice(0, 50) + (content.length > 50 ? '...' : '');
+            }
+
+            setCurrentConversation(updatedConversation);
+            
+            // Update conversations list
+            setConversations(prev => {
+              const index = prev.findIndex(c => c.id === conversation.id);
+              if (index >= 0) {
+                const newConvs = [...prev];
+                newConvs[index] = updatedConversation;
+                return newConvs;
+              } else {
+                return [updatedConversation, ...prev];
+              }
+            });
+          },
+          (error: Error) => {
+            setError(error.message);
+            setMessages(prev => prev.filter(m => m.id !== assistantMessage.id));
+          }
+        );
+      } else {
+        // For Dify API (streaming)
+        await difyService.sendMessage(
+          content,
+          conversation.id.startsWith('conv_') ? undefined : conversation.id,
+          (event: StreamEvent) => {
           // Handle different event types
           if (event.event === 'message' || event.event === 'agent_message') {
             // For agent_message, multiple events are sent with partial content
@@ -235,13 +291,14 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
             setError(event.message || 'An error occurred');
             setMessages(prev => prev.filter(m => m.id !== assistantMessage.id));
           }
-        },
-        (error: Error) => {
-          setError(error.message);
-          setMessages(prev => prev.filter(m => m.id !== assistantMessage.id));
-        },
-        currentAgent
-      );
+          },
+          (error: Error) => {
+            setError(error.message);
+            setMessages(prev => prev.filter(m => m.id !== assistantMessage.id));
+          },
+          currentAgent
+        );
+      }
     } catch (error) {
       setError((error as Error).message);
       setMessages(prev => prev.filter(m => m.id !== assistantMessage.id));

@@ -6,7 +6,11 @@ export interface AgentConfig {
   description: string;
   icon: React.ComponentType<{ className?: string }>;
   apiUrl: string;
-  apiKey: string;
+  apiKey?: string;
+  apiType: 'dify' | 'webhook';
+  authType?: 'bearer' | 'basic';
+  username?: string;
+  password?: string;
   placeholder: string;
   welcomeMessage: string;
 }
@@ -19,6 +23,8 @@ export const agents: AgentConfig[] = [
     icon: Bot,
     apiUrl: process.env.NEXT_PUBLIC_EMPLOYEE_ASSISTANT_API_URL || process.env.NEXT_PUBLIC_DIFY_API_URL || "",
     apiKey: process.env.NEXT_PUBLIC_EMPLOYEE_ASSISTANT_API_KEY || process.env.NEXT_PUBLIC_DIFY_API_KEY || "",
+    apiType: 'dify',
+    authType: 'bearer',
     placeholder: "Ask about company policies, HR questions, or workplace assistance...",
     welcomeMessage: "Hello! I'm your Employee Assistant. How can I help you with your workplace needs today?"
   },
@@ -28,7 +34,10 @@ export const agents: AgentConfig[] = [
     description: "Customer relationship management helper",
     icon: Briefcase,
     apiUrl: process.env.NEXT_PUBLIC_CRM_ASSISTANT_API_URL || "",
-    apiKey: process.env.NEXT_PUBLIC_CRM_ASSISTANT_API_KEY || "",
+    apiType: 'webhook',
+    authType: 'basic',
+    username: process.env.NEXT_PUBLIC_CRM_ASSISTANT_USERNAME || "",
+    password: process.env.NEXT_PUBLIC_CRM_ASSISTANT_PASSWORD || "",
     placeholder: "Ask about customers, sales, or CRM-related queries...",
     welcomeMessage: "Welcome! I'm your CRM Assistant. How can I help you manage customer relationships today?"
   }
