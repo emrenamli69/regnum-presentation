@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, useCallback, useEffect } fr
 import { Message, Conversation, StreamEvent } from '@/types/chat';
 import { difyService } from '@/services/dify';
 import { CRMService } from '@/services/crm-service';
+import { chartService } from '@/services/chart-service';
 import { useAgent } from '@/contexts/AgentContext';
 
 interface ChatContextType {
@@ -16,6 +17,7 @@ interface ChatContextType {
   createNewConversation: () => void;
   selectConversation: (conversationId: string) => void;
   clearError: () => void;
+  generateChart: (messageId: string) => Promise<void>;
 }
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
@@ -147,14 +149,15 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
         const crmService = new CRMService(currentAgent);
         await crmService.sendMessage(
           content,
-          (response: string) => {
+          (response) => {
             // Update the assistant message with the response
             setMessages(prev => {
               const newMessages = [...prev];
               const lastMessage = newMessages[newMessages.length - 1];
               if (lastMessage && lastMessage.role === 'assistant') {
-                lastMessage.content = response;
+                lastMessage.content = response.answer;
                 lastMessage.isStreaming = false;
+                lastMessage.dataIncluded = response.dataIncluded;
               }
               return newMessages;
             });
@@ -165,8 +168,9 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
               updated_at: Date.now(),
               messages: [...updatedMessages, {
                 ...assistantMessage,
-                content: response,
+                content: response.answer,
                 isStreaming: false,
+                dataIncluded: response.dataIncluded,
               }],
             };
 
@@ -311,6 +315,82 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     setError(null);
   }, []);
 
+  const generateChart = useCallback(async (messageId: string) => {
+    const message = messages.find(m => m.id === messageId);
+    if (!message || !message.dataIncluded) return;
+
+    // Set loading state
+    setMessages(prev => {
+      const newMessages = [...prev];
+      const msgIndex = newMessages.findIndex(m => m.id === messageId);
+      if (msgIndex !== -1) {
+        newMessages[msgIndex] = {
+          ...newMessages[msgIndex],
+          chartLoading: true
+        };
+      }
+      return newMessages;
+    });
+
+    try {
+      const chartData = await chartService.generateChart(message.content);
+      
+      if (chartData) {
+        // Update message with chart data
+        setMessages(prev => {
+          const newMessages = [...prev];
+          const msgIndex = newMessages.findIndex(m => m.id === messageId);
+          if (msgIndex !== -1) {
+            newMessages[msgIndex] = {
+              ...newMessages[msgIndex],
+              chartData,
+              chartLoading: false
+            };
+          }
+          return newMessages;
+        });
+
+        // Update conversation
+        if (currentConversation) {
+          const updatedMessages = messages.map(m => 
+            m.id === messageId ? { ...m, chartData, chartLoading: false } : m
+          );
+          
+          const updatedConversation = {
+            ...currentConversation,
+            messages: updatedMessages
+          };
+
+          setConversations(prev => {
+            const index = prev.findIndex(c => c.id === currentConversation.id);
+            if (index >= 0) {
+              const newConvs = [...prev];
+              newConvs[index] = updatedConversation;
+              return newConvs;
+            }
+            return prev;
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Failed to generate chart:', error);
+      setError('Failed to generate chart. Please try again.');
+      
+      // Reset loading state
+      setMessages(prev => {
+        const newMessages = [...prev];
+        const msgIndex = newMessages.findIndex(m => m.id === messageId);
+        if (msgIndex !== -1) {
+          newMessages[msgIndex] = {
+            ...newMessages[msgIndex],
+            chartLoading: false
+          };
+        }
+        return newMessages;
+      });
+    }
+  }, [messages, currentConversation]);
+
   return (
     <ChatContext.Provider
       value={{
@@ -323,6 +403,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
         createNewConversation,
         selectConversation,
         clearError,
+        generateChart,
       }}
     >
       {children}

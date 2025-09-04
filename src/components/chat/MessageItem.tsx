@@ -2,11 +2,13 @@
 
 import React from 'react';
 import { Message } from '@/types/chat';
-import { User, Bot, ExternalLink } from 'lucide-react';
+import { User, Bot, ExternalLink, BarChart3, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Button } from '@/components/ui/button';
+import { ChartDisplay } from './ChartDisplay';
+import { useChat } from '@/hooks/useChat';
 
 interface MessageItemProps {
   message: Message;
@@ -14,6 +16,7 @@ interface MessageItemProps {
 
 export function MessageItem({ message }: MessageItemProps) {
   const isUser = message.role === 'user';
+  const { generateChart } = useChat();
 
   return (
     <div className={cn(
@@ -150,6 +153,37 @@ export function MessageItem({ message }: MessageItemProps) {
                 {message.content}
               </ReactMarkdown>
             ) : null}
+          </div>
+        )}
+        
+        {/* Chart button and display for CRM assistant messages */}
+        {!isUser && message.dataIncluded && (
+          <div className="mt-4 space-y-4">
+            {!message.chartData && (
+              <Button
+                onClick={() => generateChart(message.id)}
+                disabled={message.chartLoading}
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-2"
+              >
+                {message.chartLoading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Generating chart...
+                  </>
+                ) : (
+                  <>
+                    <BarChart3 className="h-4 w-4" />
+                    Make a chart (Beta!)
+                  </>
+                )}
+              </Button>
+            )}
+            
+            {message.chartData && (
+              <ChartDisplay chartData={message.chartData} className="mt-4" />
+            )}
           </div>
         )}
       </div>

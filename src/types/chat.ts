@@ -1,3 +1,5 @@
+import { ChartData } from './crm';
+
 export interface Message {
   id: string;
   role: 'user' | 'assistant';
@@ -6,6 +8,9 @@ export interface Message {
   conversation_id?: string;
   metadata?: MessageMetadata;
   isStreaming?: boolean;
+  dataIncluded?: boolean;
+  chartData?: ChartData;
+  chartLoading?: boolean;
 }
 
 export interface MessageMetadata {

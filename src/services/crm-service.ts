@@ -1,4 +1,10 @@
 import { AgentConfig } from '@/config/agents';
+import { CRMResponse } from '@/types/crm';
+
+export interface CRMMessageResponse {
+  answer: string;
+  dataIncluded: boolean;
+}
 
 export class CRMService {
   private agentConfig: AgentConfig;
@@ -12,7 +18,7 @@ export class CRMService {
    */
   async sendMessage(
     query: string,
-    onComplete?: (response: string) => void,
+    onComplete?: (response: CRMMessageResponse) => void,
     onError?: (error: Error) => void
   ): Promise<void> {
     try {
@@ -40,8 +46,29 @@ export class CRMService {
 
       const data = await response.json();
       
+      // Handle array response format
+      let parsedResponse: CRMMessageResponse;
+      if (Array.isArray(data) && data.length > 0 && data[0].output) {
+        const output = data[0].output;
+        parsedResponse = {
+          answer: output.answer || '',
+          dataIncluded: output.data_included || false
+        };
+      } else if (data.output) {
+        parsedResponse = {
+          answer: data.output.answer || '',
+          dataIncluded: data.output.data_included || false
+        };
+      } else {
+        // Fallback for unexpected formats
+        parsedResponse = {
+          answer: JSON.stringify(data),
+          dataIncluded: false
+        };
+      }
+      
       if (onComplete) {
-        onComplete(data.response || data.message || JSON.stringify(data));
+        onComplete(parsedResponse);
       }
     } catch (error) {
       console.error('Failed to send message to CRM:', error);
