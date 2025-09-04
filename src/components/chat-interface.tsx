@@ -6,65 +6,90 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import React from "react";
 
 import { cn } from "@/lib/utils";
+import { useChat } from "@/hooks/useChat";
+import { MessageList } from "@/components/chat/MessageList";
 
 import { AuroraText } from "@/components/magicui/aurora-text";
 import { Marquee } from "@/components/magicui/marquee";
 
 const Feature291 = () => {
   const [value, setValue] = useState("");
+  const { messages, sendMessage, isLoading, error } = useChat();
+  
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    console.log(e.target.value);
+    // Input change handled by setValue in PlaceholdersAndVanishInput
   };
-  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  
+  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log("submitted");
+    if (value.trim() && !isLoading) {
+      await sendMessage(value);
+    }
   };
 
   const [toggle, setToggle] = useState(true);
 
   return (
-    <section className="overflow-hidden py-32">
-      <div className="container flex h-full w-full flex-col items-center justify-center">
-        <div className="flex h-full w-full max-w-2xl flex-col items-center justify-center gap-2">
-          <h1 className="my-[20vh] text-center text-4xl font-semibold tracking-tighter">
-            <AuroraText colors={["#ff6449", "#ff6449", "#6248fe", "#6248fe"]}>
-              What are we building Today?
-            </AuroraText>
-          </h1>
+    <section className="flex flex-col h-full overflow-hidden">
+      {/* Messages display area */}
+      {messages.length > 0 ? (
+        <div className="flex-1 overflow-y-auto">
+          <MessageList messages={messages} />
+        </div>
+      ) : (
+        <div className="flex-1 flex items-center justify-center">
+          <div className="flex h-full w-full max-w-2xl flex-col items-center justify-center gap-2">
+            <h1 className="text-center text-4xl font-semibold tracking-tighter">
+              <AuroraText colors={["#ff6449", "#ff6449", "#6248fe", "#6248fe"]}>
+                What are we building Today?
+              </AuroraText>
+            </h1>
 
-          <div className="relative w-full">
-            <Marquee
-              vertical={true}
-              pauseOnHover={true}
-              className="text-muted-foreground relative h-32 w-full gap-3"
-            >
-              {[
-                "Act as a phd programmer and teach me Rust as simple as you can ",
-                "How to Get started with creating awesome UI",
-                "A summary of a Current World Affairs?",
-                "What are the latest trends in AI and machine learning?",
-                "How to build a responsive website from scratch?",
-                "Explain quantum computing in simple terms",
-                "What's the best way to learn React in 2024?",
-                "How to optimize website performance?",
-                "What are the emerging technologies to watch?",
-                "How to create engaging user experiences?",
-                "What's the future of web development?",
-                "How to implement dark mode in your app?",
-              ].map((item, index) => (
-                <p
-                  key={index}
-                  onClick={() => setValue(item)}
-                  className="hover:text-foreground cursor-pointer rounded-full px-4 text-sm tracking-tight transition-colors duration-100 ease-in-out"
-                >
-                  {item}
-                </p>
-              ))}
-            </Marquee>
-            <div className="from-background pointer-events-none absolute inset-x-0 top-0 h-10 bg-gradient-to-b"></div>
-            <div className="from-background pointer-events-none absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t"></div>
+            <div className="relative w-full">
+              <Marquee
+                vertical={true}
+                pauseOnHover={true}
+                className="text-muted-foreground relative h-32 w-full gap-3"
+              >
+                {[
+                  "Act as a phd programmer and teach me Rust as simple as you can ",
+                  "How to Get started with creating awesome UI",
+                  "A summary of a Current World Affairs?",
+                  "What are the latest trends in AI and machine learning?",
+                  "How to build a responsive website from scratch?",
+                  "Explain quantum computing in simple terms",
+                  "What's the best way to learn React in 2024?",
+                  "How to optimize website performance?",
+                  "What are the emerging technologies to watch?",
+                  "How to create engaging user experiences?",
+                  "What's the future of web development?",
+                  "How to implement dark mode in your app?",
+                ].map((item, index) => (
+                  <p
+                    key={index}
+                    onClick={() => setValue(item)}
+                    className="hover:text-foreground cursor-pointer rounded-full px-4 text-sm tracking-tight transition-colors duration-100 ease-in-out"
+                  >
+                    {item}
+                  </p>
+                ))}
+              </Marquee>
+              <div className="from-background pointer-events-none absolute inset-x-0 top-0 h-10 bg-gradient-to-b"></div>
+              <div className="from-background pointer-events-none absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t"></div>
+            </div>
           </div>
-
+        </div>
+      )}
+      
+      {/* Input area at bottom */}
+      <div className="border-t bg-background">
+        <div className="container max-w-4xl mx-auto p-4">
+          {error && (
+            <div className="mb-4 p-3 bg-destructive/10 text-destructive rounded-lg text-sm">
+              {error}
+            </div>
+          )}
+          
           <div className="bg-muted rounded-4xl w-full space-y-2 px-6 py-4">
             <PlaceholdersAndVanishInput
               placeholder="How can i Help you Today"
@@ -73,6 +98,7 @@ const Feature291 = () => {
               onSubmit={onSubmit}
               value={value}
               setValue={setValue}
+              disabled={isLoading}
             />
 
             <div className="flex h-10 w-full items-center justify-between">
@@ -123,6 +149,7 @@ function PlaceholdersAndVanishInput({
   onSubmit,
   value,
   setValue,
+  disabled = false,
 }: {
   className?: string;
   placeholder: string;
@@ -130,6 +157,7 @@ function PlaceholdersAndVanishInput({
   onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
   value: string;
   setValue: (value: string) => void;
+  disabled?: boolean;
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const newDataRef = useRef<
@@ -250,7 +278,7 @@ function PlaceholdersAndVanishInput({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter" && !animating) {
+    if (e.key === "Enter" && !animating && !disabled) {
       vanishAndSubmit();
     }
   };
@@ -302,6 +330,7 @@ function PlaceholdersAndVanishInput({
         ref={inputRef}
         value={value}
         type="text"
+        disabled={disabled}
         className={cn(
           "sm:text relative z-50 h-full w-full border-none bg-transparent pr-20 text-sm tracking-tight text-black focus:outline-none focus:ring-0 dark:text-white",
           animating && "text-transparent dark:text-transparent",
@@ -309,7 +338,7 @@ function PlaceholdersAndVanishInput({
       />
 
       <button
-        disabled={!value}
+        disabled={!value || disabled}
         type="submit"
         className="absolute right-0 top-1/2 z-50 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-black transition duration-200 disabled:bg-gray-100 dark:bg-zinc-900 dark:disabled:bg-zinc-800"
       >
