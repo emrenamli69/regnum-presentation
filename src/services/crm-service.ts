@@ -40,7 +40,19 @@ export class CRMService {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        // Try to get error details from response
+        const errorData = await response.json().catch(() => null);
+        const errorMessage = errorData?.details?.message || errorData?.error || `HTTP error! status: ${response.status}`;
+        
+        console.error('CRM request failed:', {
+          status: response.status,
+          statusText: response.statusText,
+          url: url.split('?')[0], // Log URL without query params
+          errorDetails: errorData?.details,
+          timestamp: new Date().toISOString()
+        });
+        
+        throw new Error(errorMessage);
       }
 
       const data = await response.json();
