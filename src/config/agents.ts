@@ -1,4 +1,4 @@
-import { Bot, Briefcase } from "lucide-react";
+import { Bot, Briefcase, List } from "lucide-react";
 
 export interface AgentConfig {
   id: string;
@@ -40,6 +40,16 @@ export const agents: AgentConfig[] = [
     password: process.env.NEXT_PUBLIC_CRM_ASSISTANT_PASSWORD || "",
     placeholder: "Ask about customers, sales, or CRM-related queries...",
     welcomeMessage: "Welcome! I'm your CRM Assistant. How can I help you manage customer relationships today?"
+  },
+  {
+    id: "arrival-list",
+    name: "Arrival List",
+    description: "View and manage arrival lists",
+    icon: List,
+    apiUrl: "/arrival-list",
+    apiType: 'dify',
+    placeholder: "",
+    welcomeMessage: ""
   }
 ];
 

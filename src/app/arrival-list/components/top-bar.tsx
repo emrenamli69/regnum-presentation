@@ -5,8 +5,9 @@ import { Button } from "./ui/button"
 import { Calendar } from "./ui/calendar"
 import { Input } from "./ui/input"
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover"
-import { CalendarIcon, DownloadIcon, FileTextIcon } from "lucide-react"
+import { CalendarIcon, DownloadIcon, FileTextIcon, ArrowLeft } from "lucide-react"
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 
 interface TopBarProps {
   date: Date | undefined
@@ -16,11 +17,20 @@ interface TopBarProps {
 
 export function TopBar({ date, setDate, onExportPDF }: TopBarProps) {
   const [email, setEmail] = useState("")
+  const router = useRouter()
 
   return (
     <div className="w-full bg-white border-b">
       <div className="container mx-auto flex justify-between items-center p-4">
         <div className="flex items-center space-x-8">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => router.back()}
+            className="hide-in-pdf"
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
           <Image
             src="/REGNUM_LOGO_COLOR_R.svg"
             alt="Regnum Logo"

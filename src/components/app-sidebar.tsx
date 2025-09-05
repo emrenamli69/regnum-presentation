@@ -1,10 +1,10 @@
 "use client";
 
 import * as React from "react"
-import { Minus, Plus, MessageSquare, PlusCircle, List } from "lucide-react"
-import Link from "next/link"
+import { Minus, Plus, MessageSquare, PlusCircle } from "lucide-react"
 import { useChat } from "@/hooks/useChat"
 import { useAgent } from "@/contexts/AgentContext"
+import { useRouter } from "next/navigation"
 
 import { SearchForm } from "@/components/search-form"
 import {
@@ -36,6 +36,7 @@ import {
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { conversations, currentConversation, selectConversation, createNewConversation } = useChat();
   const { currentAgent, selectAgent, availableAgents } = useAgent();
+  const router = useRouter();
   
   // Group conversations by time period
   const groupConversations = () => {
@@ -147,7 +148,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </SidebarMenuItem>
           <SidebarMenuItem>
             <div className="px-3 py-2">
-              <Select value={currentAgent.id} onValueChange={selectAgent}>
+              <Select 
+                value={currentAgent.id} 
+                onValueChange={(value) => {
+                  if (value === 'arrival-list') {
+                    router.push('/arrival-list');
+                  } else {
+                    selectAgent(value);
+                  }
+                }}
+              >
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select an agent">
                     <div className="flex items-center gap-2">
@@ -179,14 +189,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             >
               <PlusCircle className="size-4 mr-2" />
               <span>New Chat</span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild className="w-full justify-center">
-              <Link href="/arrival-list">
-                <List className="size-4 mr-2" />
-                <span>Arrival List</span>
-              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
