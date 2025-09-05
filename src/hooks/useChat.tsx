@@ -29,7 +29,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [currentTaskId, setCurrentTaskId] = useState<string | null>(null);
+  const [, setCurrentTaskId] = useState<string | null>(null);
 
   // Load conversations from localStorage on mount and when agent changes
   useEffect(() => {
@@ -140,7 +140,6 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     let accumulatedContent = '';
     let conversationId: string | undefined = undefined;
     let messageId: string | undefined = undefined;
-    let isFirstChunk = true;
 
     try {
       // Handle different API types
@@ -309,7 +308,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setIsLoading(false);
     }
-  }, [currentConversation, messages, isLoading]);
+  }, [currentConversation, messages, isLoading, currentAgent]);
 
   const clearError = useCallback(() => {
     setError(null);

@@ -24,14 +24,15 @@ interface ChartDisplayProps {
   className?: string;
 }
 
-const CustomTooltip = ({ active, payload, label }: TooltipProps<number, string>) => {
+const CustomTooltip = (props: TooltipProps<number, string>) => {
+  const { active, payload, label } = props as { active?: boolean; payload?: Array<{ name?: string; value?: unknown; color?: string; dataKey?: string; payload?: Record<string, unknown> }>; label?: string };
   if (active && payload && payload.length) {
     return (
       <div className="bg-background/95 backdrop-blur-sm border border-border rounded-lg p-3 shadow-lg">
         <p className="font-semibold mb-1">{label}</p>
         {payload.map((entry, index) => (
           <p key={index} style={{ color: entry.color }} className="text-sm">
-            {entry.name}: {entry.value} {(entry.payload as any)?.[`${entry.dataKey}_unit`] || ''}
+            {entry.name}: {String(entry.value ?? '')} {String((entry.payload as Record<string, unknown>)?.[`${entry.dataKey}_unit`] || '')}
           </p>
         ))}
       </div>
@@ -42,12 +43,12 @@ const CustomTooltip = ({ active, payload, label }: TooltipProps<number, string>)
 
 export function ChartDisplay({ chartData, className }: ChartDisplayProps) {
   const [chartType, setChartType] = useState<'combo' | 'bar' | 'line'>(
-    (chartData.chartRecommendation?.primary as any) || 'bar'
+    (chartData.chartRecommendation?.primary as 'combo' | 'bar' | 'line') || 'bar'
   );
 
   // Transform data for Recharts
   const transformedData = chartData.data.labels.map((label, index) => {
-    const dataPoint: any = { label };
+    const dataPoint: Record<string, unknown> = { label };
     
     chartData.data.datasets.forEach((dataset) => {
       dataPoint[dataset.label] = dataset.data[index];
@@ -164,7 +165,7 @@ export function ChartDisplay({ chartData, className }: ChartDisplayProps) {
           {['combo', 'bar', 'line'].map((type) => (
             <button
               key={type}
-              onClick={() => setChartType(type as any)}
+              onClick={() => setChartType(type as 'combo' | 'bar' | 'line')}
               className={cn(
                 "px-3 py-1 text-xs rounded-md transition-colors",
                 chartType === type

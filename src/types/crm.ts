@@ -11,7 +11,7 @@ export interface ChartGenerationRequest {
   query: {
     analysis: string;
   };
-  body: Record<string, any>;
+  body: Record<string, unknown>;
 }
 
 export interface ChartDataset {

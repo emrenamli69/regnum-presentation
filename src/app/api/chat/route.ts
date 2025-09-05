@@ -36,7 +36,6 @@ export async function POST(request: NextRequest) {
       // Create a TransformStream to handle SSE
       const stream = new TransformStream();
       const writer = stream.writable.getWriter();
-      const encoder = new TextEncoder();
 
       // Start reading the response
       const reader = response.body?.getReader();

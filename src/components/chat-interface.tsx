@@ -18,7 +18,7 @@ const Feature291 = () => {
   const { messages, sendMessage, isLoading, error } = useChat();
   const { currentAgent } = useAgent();
   
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = () => {
     // Input change handled by setValue in PlaceholdersAndVanishInput
   };
   

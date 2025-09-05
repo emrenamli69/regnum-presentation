@@ -54,7 +54,7 @@ export interface Conversation {
 
 export interface ChatRequest {
   query: string;
-  inputs?: Record<string, any>;
+  inputs?: Record<string, unknown>;
   response_mode?: 'streaming' | 'blocking';
   user: string;
   conversation_id?: string;

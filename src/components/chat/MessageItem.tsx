@@ -47,7 +47,7 @@ export function MessageItem({ message }: MessageItemProps) {
                       return <p className="my-3">{children}</p>;
                     },
                     // Customize code blocks
-                    code({node, className, children, ...props}) {
+                    code({className, children, ...props}) {
                       const match = /language-(\w+)/.exec(className || '');
                       const isInline = !match;
                       
@@ -70,7 +70,7 @@ export function MessageItem({ message }: MessageItemProps) {
                       );
                     },
                     // Customize links to render as buttons
-                    a({href, children}) {
+                    a({href}) {
                       return (
                         <Button
                           variant="outline"
@@ -105,7 +105,7 @@ export function MessageItem({ message }: MessageItemProps) {
                     return <p className="my-3">{children}</p>;
                   },
                   // Customize code blocks
-                  code({node, className, children, ...props}) {
+                  code({className, children, ...props}) {
                     const match = /language-(\w+)/.exec(className || '');
                     const isInline = !match;
                     
@@ -128,7 +128,7 @@ export function MessageItem({ message }: MessageItemProps) {
                     );
                   },
                   // Customize links to render as buttons
-                  a({href, children}) {
+                  a({href}) {
                     return (
                       <Button
                         variant="outline"

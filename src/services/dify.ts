@@ -1,4 +1,4 @@
-import { ChatRequest, StreamEvent, ChatCompletionResponse } from '@/types/chat';
+import { ChatRequest, StreamEvent } from '@/types/chat';
 import { handleStreamResponse } from '@/utils/sse-parser';
 import { AgentConfig } from '@/config/agents';
 

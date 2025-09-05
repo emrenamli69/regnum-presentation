@@ -1,5 +1,4 @@
 import { AgentConfig } from '@/config/agents';
-import { CRMResponse } from '@/types/crm';
 
 export interface CRMMessageResponse {
   answer: string;
