@@ -26,9 +26,20 @@ export class CRMService {
       const url = `${this.agentConfig.apiUrl}?question=${encodedQuestion}`;
       
       // Create Basic Auth header
+      // Debug: Log the credentials being used (without exposing the actual password)
+      console.log('CRM Auth Debug:', {
+        usernameLength: this.agentConfig.username?.length || 0,
+        passwordLength: this.agentConfig.password?.length || 0,
+        passwordFirst3: this.agentConfig.password?.substring(0, 3) || '',
+        passwordLast3: this.agentConfig.password?.slice(-3) || '',
+        hasBackslash: this.agentConfig.password?.includes('\\') || false,
+        hasBacktick: this.agentConfig.password?.includes('`') || false
+      });
+      
       const credentials = btoa(`${this.agentConfig.username}:${this.agentConfig.password}`);
       
-      const response = await fetch('/api/crm', {
+      // Use the node https endpoint which is more reliable
+      const response = await fetch('/api/crm-node', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

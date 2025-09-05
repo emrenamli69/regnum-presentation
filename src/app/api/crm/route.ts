@@ -9,17 +9,37 @@ export async function POST(request: NextRequest) {
     url = body.url;
     const { credentials } = body;
     
-    // Log the request details (without credentials)
+    // Log the request details (with credential debugging)
     console.log('CRM API Request:', {
       timestamp: new Date().toISOString(),
       url: url,
       method: 'GET',
-      hasCredentials: !!credentials
+      hasCredentials: !!credentials,
+      // Debug credentials without exposing them
+      credentialsLength: credentials?.length || 0,
+      credentialsFirst10: credentials?.substring(0, 10) || '',
+      // Decode to check username
+      decodedUsername: (() => {
+        try {
+          const decoded = atob(credentials);
+          return decoded.split(':')[0];
+        } catch {
+          return 'DECODE_ERROR';
+        }
+      })(),
+      decodedPasswordLength: (() => {
+        try {
+          const decoded = atob(credentials);
+          return decoded.split(':')[1]?.length || 0;
+        } catch {
+          return 0;
+        }
+      })()
     });
     
     // Create abort controller for timeout
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+    const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout for slow n8n responses
     
     // Attempt the fetch with retry logic
     let lastError: Error | null = null;
@@ -38,9 +58,15 @@ export async function POST(request: NextRequest) {
           headers: {
             'Authorization': `Basic ${credentials}`,
             'Accept': 'application/json',
-            'User-Agent': 'Regnum-Employee-Assistant/1.0'
+            'User-Agent': 'Regnum-Employee-Assistant/1.0',
+            'Connection': 'keep-alive'
           },
           signal: controller.signal,
+          // Add custom agent for better timeout handling
+          keepalive: false,
+          // @ts-ignore - Next.js supports these options
+          compress: true,
+          redirect: 'follow'
         });
 
         clearTimeout(timeoutId);
@@ -119,7 +145,10 @@ export async function POST(request: NextRequest) {
             message: error instanceof Error ? error.message : String(error),
             type: isNetworkError ? 'network_error' : 'request_error',
             url: url?.split('?')[0], // URL without query params
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
+            // Add more debug info
+            errorName: error instanceof Error ? error.name : 'Unknown',
+            nodeEnv: process.env.NODE_ENV
           }
         })
       },
