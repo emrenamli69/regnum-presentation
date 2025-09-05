@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
 }
 
 // Test endpoint
-export async function GET(request: NextRequest) {
+export async function GET() {
   return NextResponse.json({
     message: 'CRM Direct endpoint is ready',
     test_url: '/api/crm-direct',

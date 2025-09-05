@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   // Test what environment variables are actually being read
   const username = process.env.NEXT_PUBLIC_CRM_ASSISTANT_USERNAME || '';
   const password = process.env.NEXT_PUBLIC_CRM_ASSISTANT_PASSWORD || '';

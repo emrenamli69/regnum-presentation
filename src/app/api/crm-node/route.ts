@@ -2,7 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import https from 'https';
 import { URL } from 'url';
 
-function httpsGet(url: string, headers: Record<string, string>): Promise<any> {
+interface HttpsResponse {
+  status: number | undefined;
+  data: unknown;
+}
+
+function httpsGet(url: string, headers: Record<string, string>): Promise<HttpsResponse> {
   return new Promise((resolve, reject) => {
     const parsedUrl = new URL(url);
     
@@ -29,7 +34,7 @@ function httpsGet(url: string, headers: Record<string, string>): Promise<any> {
             status: res.statusCode,
             data: JSON.parse(data)
           });
-        } catch (e) {
+        } catch {
           resolve({
             status: res.statusCode,
             data: data

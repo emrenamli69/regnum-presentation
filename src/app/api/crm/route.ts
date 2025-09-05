@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
           signal: controller.signal,
           // Add custom agent for better timeout handling
           keepalive: false,
-          // @ts-ignore - Next.js supports these options
+          // @ts-expect-error - Next.js supports these options
           compress: true,
           redirect: 'follow'
         });
